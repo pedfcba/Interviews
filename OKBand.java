@@ -1,6 +1,6 @@
 /*
  * 对于一个整数矩阵，存在一种运算，
- * 对矩阵中任意元素加一时，需要其相邻（上下左右）某一个元素也加一。
+ * 对矩阵中任意元素加一时，需要其相邻（上下左右）元素也加一。
  * 现给出一正数矩阵，判断其是否能够由一个全零矩阵经过上述运算得到。
  */
 
@@ -118,12 +118,10 @@ public class OKBand {
 		for(int i = 0; i < MAXSIZE; i++)
 			for(int j = 0; j < MAXSIZE; j++)
 			{
-				if(map[i][j] == 0)
+				if(map[i][j] == 0 || map[i][j] > least)
 					continue;
 				else
 				{
-					if (map[i][j] > least)
-						continue;
 					if (map[i][j] < least)
 					{
 						least = map[i][j];
