@@ -191,11 +191,6 @@ public class Brick {
 		carryBrick();
 	}
 
-	private Coordinate findTarget(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	//输出目前的数组情况
 	public void output()
 	{
