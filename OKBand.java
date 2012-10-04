@@ -112,6 +112,8 @@ public class OKBand {
 	private void uncoverOKBand()
 	{
 		int least = Integer.MAX_VALUE;
+		//找到胶布的置为真
+		boolean found = false;
 		//找到起始位置边缘的坐标集
 		for(int i = 0; i < MAXSIZE; i++)
 			for(int j = 0; j < MAXSIZE; j++)
@@ -130,6 +132,7 @@ public class OKBand {
 					coordi.add(new Coordinate(i,j));
 				}
 			}
+		//数组满足要求，返回
 		if(coordi.size() == 0)
 		{
 			System.out.println("数组空了");
@@ -141,16 +144,21 @@ public class OKBand {
 			if(map[coordi.get(i).x][coordi.get(i).y] == 0)
 				continue;
 			Coordinate target = findTarget(coordi.get(i).x, coordi.get(i).y);
-			System.out.println("揭掉: " + target.x + ", " + target.y);
 			if(target.x == -1)
 			{
-				System.out.println("无法继续完成状态");
-				output();
-				return;
+				continue;
 			}
+			found = true;
+			System.out.println("揭掉: " + target.x + ", " + target.y);
 			uncover(target.x, target.y);
 		}
 		coordi.clear();
+		//若数组不满足要求，返回
+		if(found == false)
+		{
+			System.out.println("该数组不满足要求。");
+			return;
+		}
 		System.out.println("继续寻找中。。。");
 		//进入下一轮寻找
 		uncoverOKBand();
@@ -160,7 +168,7 @@ public class OKBand {
 	private Coordinate findTarget(int x, int y) {
 		// TODO Auto-generated method stub
 		//在上,右边小于，右上等，上边大于等于
-		if(x > 0 && y < MAXSIZE-1 && map[x][y+1] < map[x][y] && map[x-1][y-1] == map[x][y] && map[x-1][y] >= map[x][y])
+		if(x > 0 && y < MAXSIZE-1 && map[x][y+1] < map[x][y] && map[x-1][y+1] == map[x][y] && map[x-1][y] >= map[x][y])
 			return new Coordinate(x-1, y);
 		//在右，下边小于，右下等于，右边大于等于
 		if(x < MAXSIZE-1 && y < MAXSIZE-1 && map[x+1][y] < map[x][y] && map[x+1][y+1] == map[x][y] && map[x][y+1] >= map[x][y])
@@ -182,12 +190,15 @@ public class OKBand {
 		// TODO Auto-generated method stub
 
 		OKBand ok = new OKBand();
-		ok.past(1, 1);
+		ok.past(0, 0);
 		ok.past(1, 2);
 		ok.past(0, 4);
 		ok.past(0, 4);
 		ok.past(3, 3);
 		ok.past(3, 3);
+		ok.past(9, 0);
+		ok.past(9, 9);
+		ok.past(0, 9);
 
 		ok.output();
 
@@ -203,18 +214,22 @@ public class OKBand {
  * 
  * 当前状态
 X 0 1 2 3 4 5 6 7 8 9 
-0 0 1 1 2 2 2 0 0 0 0 
-1 1 2 2 1 2 0 0 0 0 0 
-2 0 1 1 2 0 0 0 0 0 0 
+0 1 1 1 2 2 2 0 0 1 1 
+1 1 1 1 1 2 0 0 0 0 1 
+2 0 0 1 2 0 0 0 0 0 0 
 3 0 0 2 2 2 0 0 0 0 0 
 4 0 0 0 2 0 0 0 0 0 0 
 5 0 0 0 0 0 0 0 0 0 0 
 6 0 0 0 0 0 0 0 0 0 0 
 7 0 0 0 0 0 0 0 0 0 0 
-8 0 0 0 0 0 0 0 0 0 0 
-9 0 0 0 0 0 0 0 0 0 0 
-揭掉: 1, 1
+8 1 0 0 0 0 0 0 0 0 1 
+9 1 1 0 0 0 0 0 0 1 1 
+揭掉: 0, 9
 揭掉: 1, 2
+揭掉: 9, 9
+揭掉: 9, 0
+继续寻找中。。。
+揭掉: 0, 0
 继续寻找中。。。
 揭掉: 0, 4
 揭掉: 3, 3
@@ -232,6 +247,7 @@ X 0 1 2 3 4 5 6 7 8 9
 7 0 0 0 0 0 0 0 0 0 0 
 8 0 0 0 0 0 0 0 0 0 0 
 9 0 0 0 0 0 0 0 0 0 0 
+
 
 *
 *
