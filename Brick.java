@@ -101,7 +101,7 @@ public class Brick {
 		}
 		//寻找四邻元素中的最大值
 		int top = 0;	
-		//另一个需要进行减操作的坐标,选四向中最小者
+		//另一个需要进行减操作的坐标,选四向中最大者
 		Coordinate half = new Coordinate(x, y);
 		if(x > 0 && map[x-1][y] > top && map[x-1][y] > 0)
 		{
@@ -140,9 +140,9 @@ public class Brick {
 	 * 检查一个数组是否满足要求的条件
 	 * 
 	 * @param foundsingle 记录是否找到目标相邻元素只有一个不为0的
-	 * @param compor 记录目标临接元素相或的值
-	 * @param compsum 记录目标临接元素的和
-	 * @param found 记录是否找到合适的两个坐标进行减操作，满足则返回真
+	 * @param comp 记录第一个目标临接元素非零的值
+	 * @param sum 记录目标临接元素的和
+	 * @param found 记录是否找到合适的两个坐标进行减操作
 	 * @param top 记录数组中最小的整数值
 	 */
 	public void carryBrick()
@@ -152,39 +152,51 @@ public class Brick {
 		//找到只有一个临接元素的置为真
 		boolean foundsingle = false;
 		//堆放的高度
-		int top = 0;
+		int top = Integer.MAX_VALUE;
 
 
 		//找到临接元素中只有一个非零的元素坐标并记录
 		for(int i = 0; i < MAXSIZE; i++)
 			for(int j = 0; j < MAXSIZE; j++)
 			{
-				int compor = 0;
-				int compsum = 0;
+				int comp = 0;
+				int sum = 0;
 				if (map[i][j] != 0)
 				{
 					if(i > 0)
 					{
-						compor |= map[i-1][j];
-						compsum += map[i-1][j];
+						sum += map[i-1][j];
+						if (comp == 0)
+							comp = sum;
+						else if(comp < sum)
+								continue;
 					}
 					if(i < MAXSIZE-1)
 					{
-						compor |= map[i+1][j];
-						compsum += map[i+1][j];
+						sum += map[i+1][j];
+						if (comp == 0)
+							comp = sum;
+						else if(comp < sum)
+								continue;
 					}
 					if(j > 0)
 					{
-						compor |= map[i][j-1];
-						compsum += map[i][j-1];
+						sum += map[i][j-1];
+						if (comp == 0)
+							comp = sum;
+						else if(comp < sum)
+								continue;
 					}
 					if(j < MAXSIZE-1)
 					{
-						compor |= map[i][j+1];
-						compsum += map[i][j+1];
+						sum += map[i][j+1];
+						if (comp == 0)
+							comp = sum;
+						else if(comp < sum)
+								continue;
 					}
 					//四邻相或等于四邻相加，说明该坐标只有一个临接元素不为0
-					if(compsum == compor && compsum != 0)
+					if(sum == comp && sum != 0)
 					{
 						foundsingle = true;
 						coordi.add(new Coordinate(i,j));
@@ -205,16 +217,15 @@ public class Brick {
 			for(int i = 0; i < MAXSIZE; i++)
 				for(int j = 0; j < MAXSIZE; j++)
 				{
-					if (map[i][j] == 0 || map[i][j] < top)
+					if (map[i][j] == 0 || map[i][j] > top)
 						continue;
 					else 
 					{
-						if(map[i][j] > top)
+						if(map[i][j] < top)
 						{
 							top = map[i][j];
 							coordi.clear();
 						}
-
 						coordi.add(new Coordinate(i,j));
 					}
 				}
@@ -304,26 +315,29 @@ public class Brick {
  * 
 当前状态
 X 0 1 2 3 4 5 6 7 8 9 
-0 6 5 1 0 0 0 0 0 0 2 
-1 3 1 0 0 0 0 0 0 0 2 
+0 5 5 1 0 0 0 0 0 2 2 
+1 3 2 0 0 0 0 0 0 0 0 
 2 0 0 0 0 0 0 0 0 0 0 
 3 0 0 0 0 0 0 0 0 0 0 
 4 0 0 0 0 0 0 0 0 0 0 
 5 0 0 0 0 0 0 0 0 0 0 
 6 0 0 0 0 0 0 0 0 0 0 
 7 0 0 0 0 0 0 0 0 0 0 
-8 2 0 0 0 0 0 0 0 0 0 
-9 2 0 0 0 0 0 0 0 2 2 
+8 2 0 0 0 0 0 0 0 0 1 
+9 2 0 0 0 0 0 0 0 1 2 
 这次要搬的目标：
 0, 2
-0, 9
-1, 0
+0, 8
 8, 0
+8, 9
 9, 8
 继搬砖中。。。
 这次要搬的目标：
-0, 0
 1, 1
+继搬砖中。。。
+这次要搬的目标：
+0, 1
+1, 0
 继搬砖中。。。
 砖搬完了！
 当前状态
@@ -338,6 +352,7 @@ X 0 1 2 3 4 5 6 7 8 9
 7 0 0 0 0 0 0 0 0 0 0 
 8 0 0 0 0 0 0 0 0 0 0 
 9 0 0 0 0 0 0 0 0 0 0 
+
 
  *
  *
