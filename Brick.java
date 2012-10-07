@@ -82,11 +82,12 @@ public class Brick {
 
 	/**
 	 * 
-	 * 对指定坐标及其相邻坐标进行减操作，减去四向中最大的量
+	 * 对输入坐标及其相邻坐标进行减操作，两坐标同时减去输入坐标的数值
 	 * 
 	 * @param x 目标横坐标 
 	 * @param y 目标纵坐标
-	 * @param top 一次最多能进行的减操作
+	 * @param top 记录四邻元素中的最大值，确定进行减操作的第二个元素
+	 * @param half 除输入坐标外，需要进行减操作的第二个坐标
 	 * 
 	 * @return 若产生减操作，返回true，否则返回false
 	 */
@@ -98,36 +99,36 @@ public class Brick {
 			System.out.println("坐标：" + x + ", " + y);
 			return false;
 		}
-		//一次最多能取走的量
+		//寻找四邻元素中的最大值
 		int top = 0;	
-		//另一个需要进行减操作的坐标,选四向中最大者
+		//另一个需要进行减操作的坐标,选四向中最小者
 		Coordinate half = new Coordinate(x, y);
-		if(x > 0 && map[x-1][y] > top)
+		if(x > 0 && map[x-1][y] > top && map[x-1][y] > 0)
 		{
 			top = map[x-1][y];
 			half.x = x-1;
 		}
-		if(x < MAXSIZE-1 && map[x+1][y] > top)
+		if(x < MAXSIZE-1 && map[x+1][y] > top && map[x+1][y] > 0)
 		{
 			top = map[x+1][y];
 			half.x = x+1;
 		}
-		if(y > 0 && map[x][y-1] > top)
+		if(y > 0 && map[x][y-1] > top && map[x][y-1] > 0)
 		{
 			top = map[x][y-1];
 			half.y = y-1;
 		}
-		if(y < MAXSIZE-1 && map[x][y+1] > top)
+		if(y < MAXSIZE-1 && map[x][y+1] > top && map[x][y+1] > 0)
 		{
 			top = map[x][y+1];
 			half.y = y+1;
 		}
 
 		//拿走
-		if(map[x][y] != 0)
-			map[x][y] -= top;
-		map[half.x][half.y] -= top;
+		map[half.x][half.y] -= map[x][y];
+		map[x][y] -= map[x][y];
 
+		//若未找到合适的元素，返回false
 		if(top == 0)
 			return false;
 		else
@@ -136,41 +137,96 @@ public class Brick {
 
 
 	/**
-	 * 从数组中找到最大值并与其四向参数中的最大值进行减操作
+	 * 检查一个数组是否满足要求的条件
 	 * 
-	 * 
+	 * @param foundsingle 记录是否找到目标相邻元素只有一个不为0的
+	 * @param compor 记录目标临接元素相或的值
+	 * @param compsum 记录目标临接元素的和
 	 * @param found 记录是否找到合适的两个坐标进行减操作，满足则返回真
-	 * @param top 记录数组中最大的整数值
+	 * @param top 记录数组中最小的整数值
 	 */
 	public void carryBrick()
 	{
 		//满足要求则置为真
 		boolean found = false;
-		//堆放最高的高度
+		//找到只有一个临接元素的置为真
+		boolean foundsingle = false;
+		//堆放的高度
 		int top = 0;
 
-		//找到高度最高的坐标并记录
+
+		//找到临接元素中只有一个非零的元素坐标并记录
 		for(int i = 0; i < MAXSIZE; i++)
 			for(int j = 0; j < MAXSIZE; j++)
 			{
-				if (map[i][j] == 0 || map[i][j] < top)
-					continue;
-				else 
+				int compor = 0;
+				int compsum = 0;
+				if (map[i][j] != 0)
 				{
-					if(map[i][j] > top)
+					if(i > 0)
 					{
-						top = map[i][j];
-						coordi.clear();
+						compor |= map[i-1][j];
+						compsum += map[i-1][j];
 					}
-					coordi.add(new Coordinate(i,j));
+					if(i < MAXSIZE-1)
+					{
+						compor |= map[i+1][j];
+						compsum += map[i+1][j];
+					}
+					if(j > 0)
+					{
+						compor |= map[i][j-1];
+						compsum += map[i][j-1];
+					}
+					if(j < MAXSIZE-1)
+					{
+						compor |= map[i][j+1];
+						compsum += map[i][j+1];
+					}
+					//四邻相或等于四邻相加，说明该坐标只有一个临接元素不为0
+					if(compsum == compor && compsum != 0)
+					{
+						foundsingle = true;
+						coordi.add(new Coordinate(i,j));
+					}
 				}
 			}
+
+
+		/*
+		 * 没有找到临接元素个数为一的元素
+		 * 找到边缘且最小的元素
+		 * 及与其临接的最大元素
+		 * 记录并进行减操作
+		*/
+		if(foundsingle == false)
+		{
+			//找到最边缘且最小的坐标并记录
+			for(int i = 0; i < MAXSIZE; i++)
+				for(int j = 0; j < MAXSIZE; j++)
+				{
+					if (map[i][j] == 0 || map[i][j] < top)
+						continue;
+					else 
+					{
+						if(map[i][j] > top)
+						{
+							top = map[i][j];
+							coordi.clear();
+						}
+
+						coordi.add(new Coordinate(i,j));
+					}
+				}
+		}
+		
 		//若没有坐标记录，则数组满足要求，返回
 		if(coordi.size() == 0)
 		{
 			System.out.println("砖搬完了！");
 			return;
 		}
+		
 		//按照坐标集进行减操作，相邻元素选择四向中数值最大的
 		System.out.println("这次要搬的目标：");
 		for(int i = 0; i < coordi.size(); i++)
@@ -221,6 +277,10 @@ public class Brick {
 
 		Brick br = new Brick();
 		br.put(0, 0);
+		br.put(0, 0);
+		br.put(0, 0);
+		br.put(0, 1);
+		br.put(0, 1);
 		br.put(0, 1);
 		br.put(0, 9);
 		br.put(9, 0);
@@ -239,13 +299,13 @@ public class Brick {
 
 
 /*
-* ****************result*******************
-* 
-* 
+ * ****************result*******************
+ * 
+ * 
 当前状态
 X 0 1 2 3 4 5 6 7 8 9 
-0 2 3 0 0 0 0 0 0 1 2 
-1 1 2 0 0 0 0 0 0 0 1 
+0 6 5 1 0 0 0 0 0 0 2 
+1 3 1 0 0 0 0 0 0 0 2 
 2 0 0 0 0 0 0 0 0 0 0 
 3 0 0 0 0 0 0 0 0 0 0 
 4 0 0 0 0 0 0 0 0 0 0 
@@ -255,17 +315,15 @@ X 0 1 2 3 4 5 6 7 8 9
 8 2 0 0 0 0 0 0 0 0 0 
 9 2 0 0 0 0 0 0 0 2 2 
 这次要搬的目标：
-0, 1
-继搬砖中。。。
-这次要搬的目标：
-0, 0
+0, 2
 0, 9
+1, 0
 8, 0
 9, 8
 继搬砖中。。。
 这次要搬的目标：
 0, 0
-0, 8
+1, 1
 继搬砖中。。。
 砖搬完了！
 当前状态
@@ -280,6 +338,7 @@ X 0 1 2 3 4 5 6 7 8 9
 7 0 0 0 0 0 0 0 0 0 0 
 8 0 0 0 0 0 0 0 0 0 0 
 9 0 0 0 0 0 0 0 0 0 0 
-*
-*
-*/
+
+ *
+ *
+ */
